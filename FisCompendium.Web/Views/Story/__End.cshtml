@@ -1,0 +1,26 @@
+﻿@using FisCompendium.Web.Controllers
+@{
+    var storyData = new StoryData();
+    var Username = User?.Identity?.Name ?? "Guest";
+    var LoggedIn = Username != "Guest";
+}
+
+<span>Hello, and thanks for reading! You have reached the current progress point in the story. The last chapter was published on @(StoryData.LAST_PUBLISHED_DATE).</span>
+<br /><br />
+<ul>
+    <li><span>If you’d like to participate in the quest directly, head over to the quest thread on <a href="@StoryData.SV_LINK" target="_blank">Sufficient Velocity</a>.</span></li>
+    <li><span> There is also the <a href="@StoryData.DISCORD_LINK" target="_blank">Discord</a> for discussion (#lotg channel), and an opt-in role there for pings when new chapters are published (check pinned messages). Stop by and say hi!</span></li>
+    <li>
+    @if (LoggedIn)
+    {
+        <span>Alternatively, you can subscribe to email updates directly on this site by <a href="Account/UpdatePreferences">updating your preferences.</a></span>
+    }
+    else
+    {
+        <span>Alternatively, you can subscribe to email updates directly on this site by <a href="Account/Register">creating an account</a> or <a href="Account/UpdatePreferences">logging in and updating your preferences</a>.</span>
+    }
+    </li>
+    <li><span>If you have feedback, I’d love to hear from you! Drop an email at <a href="mailto:">admin@chaossnek.com</a>.</span></li>
+</ul>
+
+<br /><br />

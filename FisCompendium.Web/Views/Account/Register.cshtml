@@ -1,0 +1,80 @@
+﻿@model FisCompendium.Web.Models.Account.AccountRegistrationRaw
+
+@{
+    ViewBag.Title = "Register";
+}
+
+<div id="register-form" style="margin-left: 10px">
+    @using (Html.BeginForm("Register", "Account", FormMethod.Post))
+    {
+        @Html.TextBoxFor(x => x.Username, new { placeholder = "Username" })
+        <div class="text-danger">
+            @Html.ValidationMessageFor(x => x.Username)
+        </div>
+        @Html.PasswordFor(x => x.Password, new { placeholder = "Password" })
+        <div class="text-danger">
+            @Html.ValidationMessageFor(x => x.Password)
+        </div>
+        @Html.TextBoxFor(x => x.RecoveryEmail, new { placeholder = "Recovery Email" })
+        <div class="text-danger">
+            @Html.ValidationMessageFor(x => x.RecoveryEmail)
+        </div>
+
+        <div id="captcha" style="max-width: 200px">
+            <hr />
+            <p id="captcha-msg">Prove you are not a spambot.</p>
+            @Html.TextBoxFor(x => x.ConfirmHuman, new { placeholder = "", autocomplete = "off" })
+            @Html.TextBoxFor(x => x.Captcha, new { placeholder = "2+2=?", style="display: none"})
+            <hr/>
+        </div>
+
+        <div style="max-width: 200px">
+            <input id="tac-ack" type="checkbox" style="float: left; width: 20px" />
+            <span style="display: block;">I have read and agree to the <a href="/Home/TAC" target="_blank">Terms and Conditions</a>.</span>
+            <br />
+        </div>
+
+        <div style="max-width: 200px">
+            @Html.CheckBoxFor(x => x.Subscribed, new {style="float: left; width: 20px"})
+            <span style="display: block;">I would like to subscribe to story updates.</span>
+            <br />
+        </div>
+
+        <input id="submit-btn" type="submit" class="btn btn-primary" disabled />
+    }
+    <br />@Html.ActionLink("Already have an account?", "Login", "Account")<br /><br />
+    <div>
+        <span size="2">Notes:</span>
+        <ul>
+            <li><span size="2">Please use your Sufficient Velocity username; otherwise your participation will not be tracked for the purposes of awarding <a href="/PlayerLog", target="_blank">points</a>.</span></li>
+            <li><span size="2">If you use someone else's SV username, you may be required to choose an alternate name.</span></li>
+            <li><span size="2">Email addresses are only ever used for site administration, account recovery, and subscription notifications. They will never be shared with anyone.</span></li>
+        </ul>
+    </div>
+</div>
+<script type="text/javascript">
+
+    function not_spambot(e) {
+        $('#captcha-msg').text('Please enter the ninth word of this sentence into the box below, disregarding the other prompts. What color is an orange?');
+        $('#ConfirmHuman').hide();
+        $('#Captcha').show();
+        setInterval(function() {
+            $('#ConfirmHuman').val(null);
+        }, 50);
+    }
+
+    function tac_acknowledge() {
+        if ($(this).prop('checked')) {
+            $("#submit-btn").removeAttr("disabled");
+        } else {
+            $("#submit-btn").prop("disabled", true);
+        }
+    }
+
+    $(document).ready(function() {
+        $('#captcha').on('touchstart', not_spambot);
+        $('#captcha').on('mousemove', not_spambot);
+        $('#ConfirmHuman').val("I am a spambot.");
+        $('#tac-ack').change(tac_acknowledge);
+    });
+</script>

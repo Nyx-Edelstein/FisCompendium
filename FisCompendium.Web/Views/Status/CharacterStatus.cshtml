@@ -1,0 +1,230 @@
+﻿@using FisCompendium.Web.Models.Status
+@model FisCompendium.Web.Models.Status.CharacterStatus
+@{
+    var heartType = "";
+    switch (Model.HeartsPartial)
+    {
+        case HeartState.Empty:
+            heartType = "Empty";
+            break;
+        case HeartState.OneQuarter_NoEmpty:
+            heartType = "1Q-0E";
+            break;
+        case HeartState.OneQuarter_OneEmpty:
+            heartType = "1Q-1E";
+            break;
+        case HeartState.OneQuarter_TwoEmpty:
+            heartType = "1Q-2E";
+            break;
+        case HeartState.OneQuarter_ThreeEmpty:
+            heartType = "1Q-3E";
+            break;
+        case HeartState.TwoQuarter_NoEmpty:
+            heartType = "2Q-0E";
+            break;
+        case HeartState.TwoQuarter_OneEmpty:
+            heartType = "2Q-1E";
+            break;
+        case HeartState.TwoQuarter_TwoEmpty:
+            heartType = "2Q-2E";
+            break;
+        case HeartState.ThreeQuarter_NoEmpty:
+            heartType = "3Q-0E";
+            break;
+        case HeartState.ThreeQuarter_OneEmpty:
+            heartType = "3Q-1E";
+            break;
+        case HeartState.Full:
+            heartType = "Full";
+            break;
+    }
+    var heart_id = Guid.NewGuid();
+    var canvas_id = Guid.NewGuid();
+    var magic_id = Guid.NewGuid();
+}
+
+<style>
+    .container {
+        margin-top: 40px;
+        padding-top: 20px;
+        /*background-color: #beb*/
+    }
+
+    .vertical {
+        display: inline-block;
+        width: 20%;
+        height: 40px;
+        -webkit-transform: rotate(-90deg); /* Chrome, Safari, Opera */
+        transform: rotate(-90deg);
+    }
+
+    .vertical {
+        box-shadow: inset 0px 4px 6px #ccc;
+    }
+
+    .progress-bar {
+        box-shadow: inset 0px 4px 6px rgba(100,100,100,0.6);
+    }
+
+    .stamina-full {
+        border: 18px solid #0EAD00;
+        border-radius: 50%;
+        height: 60px;
+        width: 60px;
+        /*box-shadow: 0 0 20px #5EFD50;*/
+    }
+
+    .stamina-empty {
+        border: 18px solid black;
+        border-radius: 50%;
+        height: 60px;
+        width: 60px;
+        box-shadow: 0 0 20px #700000;
+    }
+
+</style>
+
+<div style="display: flex; padding: 2px 15px 0 15px">
+    <div style="flex: 1; order: 1">
+        <h4 style="font-family: algerian; text-align: left">@Model.Name</h4>
+    </div>
+</div>
+<div style="margin: -25px 10px -25px 10px">
+    <hr />
+</div>
+<div style="display:flex; justify-content:center; align-items:center;">
+    <div style="width:100%;">
+        <div style="display: flex;">
+            <div style="flex: 3; order: 1">
+                <div style="border-style: ridge; border-width: 9px; border-radius: 15px; width: 55px; height: 142px; margin: 10px 0 0 5px">
+                    <div class="vertical progress progress-striped active" style="width: 125px; margin: 43px 0 0 -43px">
+                        <div class="progress-bar progress-bar-danger" style="width: @(Model.MagicDamagePercent)%"></div>
+                        <div id="@magic_id" class="progress-bar progress-bar-success" style="width: @(Model.MagicPercent - Model.MagicDamagePercent)%"></div>
+                    </div>
+                </div>
+            </div>
+            <div style="flex: 14; order: 2; margin: 15px 0 0 10px">
+                <div style="width: 100%; height: 75px; display: inline-block">
+                    @for (var i = 0; i < Model.HeartsFull; i++)
+                    {
+                        <img style="width: 35px" src="~/img/hearts/Full.png" />
+                    }
+                    <div style="width: 35px; display: inline-block;">
+                        <div style="display: flex; justify-content:center; align-items:center;">
+                            <div style="width: 35px">
+                                <img id="@heart_id" style="width: 35px" src="~/img/hearts/@(heartType).png" />
+                            </div>
+                        </div>
+                    </div>
+                    @for (var i = 0; i < Model.HeartsEmpty; i++)
+                    {
+                        <div style="width: 35px; display:inline-block">
+                            <img style="width: 30px" src="~/img/hearts/Empty.png" />
+                        </div>
+                    }
+                </div>
+                <div style="display: flex; justify-content:center; align-items:center; margin: -15px 50% 0 50%">
+                    @for (var i = 0; i < Model.StaminaFullWheels; i++)
+                    {
+                        <div style="flex: 1; order: @i; padding: 2px">
+                            <div class="stamina-full"></div>
+                        </div>
+                    }
+                    <div style="flex: 1; order: @(Model.StaminaFullWheels); margin: 5px 0 0 0;">
+                        <canvas id="@canvas_id" class="stamina-arc" width=60 height=60></canvas>
+                    </div>
+                    @for (var i = 0; i < Model.StaminaEmptyWheels; i++)
+                    {
+                        <div style="flex: 1; order: @(i + Model.StaminaFullWheels); padding: 2px">
+                            <div class="stamina-empty"></div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div style="flex: 3; order: 3">
+                <div style="border-style: ridge; border-width: 9px; border-radius: 15px; width: 55px; height: 142px; margin: 10px 5px 0 0; float: right">
+                    <div class="vertical progress active" style="width: 125px; margin: 43px 0 0 -43px">
+                        <div class="progress-bar progress-bar-info" style="width: @(Model.FatiguePercent)%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var canvas = document.getElementById("@canvas_id");
+    var ctx = canvas.getContext("2d");
+
+    var colors = ['#00000030', 'black', '#0EAD00'];
+    var values = [@Model.StaminaCurrentMissing, @Model.StaminaCurrentUsed, @Model.StaminaCurrentRemaining];
+    dmbChart(30, 30, 21, 18, values, colors, 0, ctx);
+
+    function dmbChart(cx, cy, radius, arcwidth, values, colors, selectedValue, context) {
+        var tot = 0;
+        var accum = 0;
+        var PI = Math.PI;
+        var PI2 = PI * 2;
+        var offset = -PI / 2;
+        context.lineWidth = arcwidth;
+        for (var i = 0; i < values.length; i++) { tot += values[i]; }
+        for (var i = 0; i < values.length; i++) {
+            context.beginPath();
+            context.arc(cx, cy, radius,
+                offset + PI2 * (accum / tot),
+                offset + PI2 * ((accum + values[i]) / tot)
+            );
+            context.strokeStyle = colors[i];
+            context.stroke();
+            accum += values[i];
+        }
+    }
+
+    $(document).ready(function () {
+        //var small = { width: "30px" };
+        //var large = { width: "35px" };
+
+        //var delay = Math.random() * 100;
+        //var animateHeart = function () {
+        //    $('#@heart_id').animate(small, 450 + delay, "swing", function() {
+        //        $('#@heart_id').animate(large, 750 + delay, "swing", function() {
+        //            setTimeout(animateHeart, 1);
+        //        });
+        //    });
+        //}
+        //animateHeart();
+
+        //var delay2 = (Math.random() - 0.50) * 200;
+        //var _in = { margin: "-10px 0 0 0;" };
+        //var _out = { margin: "0px 0 0 0;" };
+        //var animateStamina = function() {
+        //    $('#@canvas_id').animate(_in, 1450 + delay2, "swing", function() {
+        //        $('#@canvas_id').animate(_out, 1150 + delay2, "swing", function() {
+        //            setTimeout(animateStamina, 1);
+        //        });
+        //    });    
+        //}
+        //animateStamina();
+        
+        //var delay3 = (Math.random() - 0.25) * 500;
+        //var light = { backgroundColor: "#00A000" };
+        //var dark = { backgroundColor: "#007000" };
+        //var animateMagic = function() {
+        //    $('#@magic_id').animate(light, 1000 + delay3, "swing", function() {
+        //        $('#@magic_id').animate(dark, 1000 + delay3, function() {
+        //            setTimeout(animateMagic, 1);
+        //        });
+        //    });    
+        //}
+        //animateMagic();
+        
+        //var delay3 = (Math.random() - 0.25) * 500;
+        var light = { backgroundColor: "#00A000" };
+        var dark = { backgroundColor: "#007000" };
+        var animateMagic = function() {
+            $('#@magic_id').animate(light, 0, "swing");    
+        }
+        animateMagic();
+    });
+
+</script>

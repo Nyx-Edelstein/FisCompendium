@@ -1,0 +1,208 @@
+﻿@using Newtonsoft.Json;
+@using FisCompendium.Data;
+@using FisCompendium.Data.User_Data
+@using FisCompendium.Web.Models.PlayerPoints;
+@model PlayerPointsTransfer
+@{
+    ViewBag.Title = "Player Points Log";
+    var validUsers = ViewData["ValidPlayerNames"] as List<string>;
+    var playerLogEntries = ViewData["PlayerLog"] as List<PlayerLogEntry>;
+
+    var top10PlayersCurrent = ViewData["TopPlayersCurrent"] as List<UserPoints> ?? new List<UserPoints>();
+    var top10PlayersTotal = ViewData["TopPlayersTotal"] as List<UserPoints> ?? new List<UserPoints>();
+    var userPoints = ViewData["UserPoints"] as UserPoints;
+    var playerIsInTopCurrent = userPoints != null && top10PlayersCurrent.Any(x => x.Id == userPoints.Id);
+}
+
+<div class="row" style="overflow-x: auto;">
+    <div class="col-12-md">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+                <a data-toggle="tab" role="tab" href="#leaderboard-current" class="nav-link active">Leaderboard (Current)</a>
+            </li>
+            <li class="nav-item">
+                <a data-toggle="tab" role="tab" href="#transfer" class="nav-link">Transfer</a>
+            </li>
+            <li class="nav-item">
+                <a data-toggle="tab" role="tab" href="#log" class="nav-link">Log</a>
+            </li>
+        </ul>
+        <div class="tab-content" style="border-top: solid; border-width: 2px;">
+            <!--Leaderboard (Current)-->
+            <div role="tabpanel" class="tab-pane fade in active" id="leaderboard-current">
+                <div class="well well-lg" style="margin-bottom: 0px;">
+                    @if (!top10PlayersCurrent.Any())
+                    {
+                        <h3>Leaderboard currently unavailable.</h3>
+                    }
+                    else
+                    {
+                        <div class="hidden-xs" style="min-width: 500px;">
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <h4><u>Rank</u></h4>
+                                </div>
+                                <div class="col-sm-4">
+                                    <h4><u>Player</u></h4>
+                                </div>
+                                <div class="col-sm-2">
+                                    <h4><u>Current</u></h4>
+                                </div>
+                                <div class="col-sm-2">
+                                    <h4><u>Pending</u></h4>
+                                </div>
+                                <div class="col-sm-2">
+                                    <h4><u>Total</u></h4>
+                                </div>
+                            </div>
+                            @{
+                                var currentNum = 1;
+                            }
+                            @foreach (var points in top10PlayersCurrent)
+                            {
+                                var totalCurrent = points.CurrentPoints + points.PendingPoints;
+                                var isPlayer = points.Id == userPoints?.Id;
+                                var highlightStyle = isPlayer ? "border-style: solid; border-width: 2px; border-color: yellow;" : "";
+                                <div class="row" style="@highlightStyle">
+                                    <div class="col-sm-2">
+                                        <p>@currentNum</p>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <p>@points.Username</p>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <p>@points.CurrentPoints</p>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <p>@points.PendingPoints</p>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <p>@totalCurrent</p>
+                                    </div>
+                                </div>
+                                currentNum += 1;
+                            }
+                            @if (!playerIsInTopCurrent && userPoints != null)
+                            {
+                                var userTotalCurrent = userPoints.CurrentPoints + userPoints.PendingPoints;
+                                <hr />
+                                <div class="row">
+                                    <div class="col-sm-2">
+                                        <p> - </p>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <p>@userPoints.Username</p>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <p>@userPoints.CurrentPoints</p>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <p>@userPoints.PendingPoints</p>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <p>@userTotalCurrent</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="hidden-sm hidden-md hidden-lg hidden-lg-up" style="overflow-x: hidden">
+                            <div class="row" style="font-weight: bolder">
+                                <div class="col-xs-1">
+                                    <span><u>#:&nbsp;</u></span>
+                                </div>
+                                <div class="col-xs-5">
+                                    <span><u>Name</u></span><br/>
+                                </div>
+                                <div class="col-xs-5">
+                                    <span><u>Curr. Total</u></span>
+                                </div>
+                            </div>
+                            @{
+                                var currentNumMobile = 1;
+                            }
+                            @foreach (var points in top10PlayersCurrent)
+                            {
+                                var totalCurrent = points.CurrentPoints + points.PendingPoints;
+                                var isPlayer = points.Id == userPoints?.Id;
+                                var highlightStyle = isPlayer ? "border-style: solid; border-width: 2px; border-color: yellow;" : "";
+                                <div class="row" style="@highlightStyle">
+                                    <div class="col-xs-1">
+                                        <span>@currentNumMobile:&nbsp;</span>
+                                    </div>
+                                    <div class="col-xs-5">
+                                        <span>@points.Username</span><br/>
+                                    </div>
+                                    <div class="col-xs-5">
+                                        <span>@totalCurrent</span>
+                                    </div>
+                                </div>
+                                currentNumMobile += 1;
+                            }
+                            @if (!playerIsInTopCurrent && userPoints != null)
+                            {
+                                var userTotalCurrent = userPoints.CurrentPoints + userPoints.PendingPoints;
+                                <hr/>
+                                <div class="row">
+                                    <div class="col-xs-1">
+                                        <span>&nbsp;-&nbsp;</span>
+                                    </div>
+                                    <div class="col-xs-5">
+                                        <span>@userPoints.Username</span><br />
+                                    </div>
+                                    <div class="col-xs-5">
+                                        <span>@userTotalCurrent</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!--Transfer Points-->
+            <div role="tabpanel" class="tab-pane fade in" id="transfer">
+                <div class="well well-lg" style="min-width: 350px; margin-bottom: 0px;">
+                    <h2><u>Transfer to Whom?</u></h2><br />
+                    @using (Html.BeginForm("Transfer", "PlayerLog", FormMethod.Post))
+                    {
+                        @Html.TextBoxFor(x => x.ToPlayer, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(x => x.ToPlayer)
+                        </div>
+                        <hr />
+                        @Html.TextAreaFor(x => x.Reason, new { @class = "form-control", @placeholder = "Reason" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(x => x.Reason)
+                        </div>
+                        @Html.TextBoxFor(x => x.PointChange, new { @class = "form-control", @placeholder = "Point Change" })
+                        <hr/>
+                        <div class="text-center">
+                            <input type="submit" class="btn btn-primary" style="width: 100%"/>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!--Log-->
+            <div role="tabpanel" class="tab-pane fade in" id="log">
+                <div class="well well-lg" style="max-height: 600px; overflow-y: auto; margin-bottom: 0px;">
+                    @foreach (var logEntry in playerLogEntries)
+                    {
+                        <p><span style="color: darkgray">@logEntry.Timestamp:</span><br /><span class="text-highlight">@logEntry.Message</span></p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        $("#ToPlayer").tagit({
+            fieldName: "ToPlayer",
+            availableTags: @Html.Raw(JsonConvert.SerializeObject(validUsers)),
+            caseSensitive: false
+        });
+    </script>
+}

@@ -1,0 +1,56 @@
+﻿@using FisCompendium.Web.Models.Translator
+@model FisCompendium.Web.Models.Translator.TranslatorUpdateModel
+
+@{
+    ViewBag.Title = "Misc Tools";
+
+    var possibleLanguages = ((IEnumerable<string>)ViewData["PossibleLanguages"])
+        .Select(x => new SelectListItem
+        {
+            Value = x,
+            Text = x
+        })
+        .ToList();
+    var translatorResponse = ViewData["Response"] as TranslatorResponseModel;
+    double TranslationCost = translatorResponse?.Cost ?? 0.0;
+    string FuzzyText = translatorResponse?.FuzzyText ?? "";
+}
+<h2>Translation Tool:</h2>
+<hr/>
+<div class="row">
+    <div class="col-md-3" style="margin: 0 0 50px 0">
+        <!--Form-->
+        <div style="width: 350px">
+            @using (Html.BeginForm("Index", "MiscTools", FormMethod.Post))
+            {
+                <h4>Text to translate:</h4>
+                @Html.TextAreaFor(x => x.InputText, new { rows = "20", cols = "46" })
+                <div class="text-danger">
+                    @Html.ValidationMessageFor(x => x.InputText)
+                </div>
+                <h4>Select Language: </h4>
+                @Html.DropDownListFor(x => x.SelectedLanguage, possibleLanguages, new { @class = "form-control", size="11"})
+                <div class="text-danger">
+                    @Html.ValidationMessageFor(x => x.SelectedLanguage)
+                </div>
+                <h4>Complexity Limit:</h4>
+                @Html.TextBoxFor(x => x.Limit, new { @class = "form-control", @placeholder = "1000" })
+                <div class="text-danger">
+                    @Html.ValidationMessageFor(x => x.Limit)
+                </div>
+                <hr/>
+                <input type="submit" class="btn btn-primary" style="width: 350px" />
+            }
+        </div>
+    </div>
+    <div class="col-md-1"></div>
+    <div class="col-md-3">
+        <!--Response-->
+        <div style="width: 350px">
+            <h4>Translated:</h4>
+            <textarea rows="20" cols="46" disabled>@FuzzyText</textarea>
+            <h4>Cost: @TranslationCost</h4>
+        </div>
+    </div>
+</div>
+<hr/>

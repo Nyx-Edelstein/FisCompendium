@@ -1,0 +1,10 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7B490BA2_002D8F4D_002D4CD6_002DAE15_002DA517BCC59994_002Fd_003AViews_002Fd_003ACharacterDossier_002Ff_003AIndex_002Ecshtml/@EntryIndexedValue">ForceIncluded</s:String>
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7B490BA2_002D8F4D_002D4CD6_002DAE15_002DA517BCC59994_002Fd_003AViews_002Fd_003AEntityCompendium_002Ff_003AIndex_002Ecshtml/@EntryIndexedValue">ForceIncluded</s:String>
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7B490BA2_002D8F4D_002D4CD6_002DAE15_002DA517BCC59994_002Fd_003AViews_002Fd_003AKnowledgeCompendium_002Ff_003AEdit_002Ecshtml/@EntryIndexedValue">ForceIncluded</s:String>
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7B490BA2_002D8F4D_002D4CD6_002DAE15_002DA517BCC59994_002Fd_003AViews_002Fd_003AKnowledgeCompendium_002Ff_003AIndex_002Ecshtml/@EntryIndexedValue">ForceIncluded</s:String>
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7B490BA2_002D8F4D_002D4CD6_002DAE15_002DA517BCC59994_002Fd_003AViews_002Fd_003AKnowledgeCompendium_002Ff_003ASearchResults_002Ecshtml/@EntryIndexedValue">ForceIncluded</s:String>
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7B490BA2_002D8F4D_002D4CD6_002DAE15_002DA517BCC59994_002Fd_003AViews_002Fd_003AMagicCompendium_002Ff_003AIndex_002Ecshtml/@EntryIndexedValue">ForceIncluded</s:String>
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7B490BA2_002D8F4D_002D4CD6_002DAE15_002DA517BCC59994_002Fd_003AViews_002Fd_003AMagic_002Ff_003AIndex_002Ecshtml/@EntryIndexedValue">ForceIncluded</s:String>
+	
+	</wpf:ResourceDictionary>

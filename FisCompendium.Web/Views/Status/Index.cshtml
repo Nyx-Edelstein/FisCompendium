@@ -1,0 +1,195 @@
+﻿@using FisCompendium.Web.Models.Status
+@model FisCompendium.Web.Models.Status.StatusData
+@{
+    ViewBag.Title = "Current Status";
+
+    var status = new StatusData
+    {
+        CurrentVoidPower = 2424,
+        CurrentStoredMagic = 1008,
+        Characters = new CharacterStatus[]
+        {
+            new CharacterStatus
+            {
+                Name = "Link",
+                Color = "Yellow",
+
+                MagicPercent = 100,
+                MagicDamagePercent = 0,
+
+                HeartsFull = 5,
+                HeartsPartial = HeartState.Full,
+                HeartsEmpty = 0,
+
+                StaminaFullWheels = 1,
+                StaminaCurrentRemaining = 10,
+                StaminaCurrentUsed = 3,
+                StaminaEmptyWheels = 0,
+
+                FatiguePercent = 0,
+            },
+            new CharacterStatus
+            {
+                Name = "Izu",
+                Color = "Blue",
+
+                MagicPercent = 100,
+                MagicDamagePercent = 0,
+
+                HeartsFull = 5,
+                HeartsPartial = HeartState.Full,
+                HeartsEmpty = 0,
+
+                StaminaFullWheels = 0,
+                StaminaCurrentRemaining = 14,
+                StaminaCurrentUsed = 1,
+                StaminaEmptyWheels = 0,
+
+                FatiguePercent = 0,
+            },
+            new CharacterStatus
+            {
+                Name = "Grenja",
+                Color = "Red",
+
+                MagicPercent = 100,
+                MagicDamagePercent = 0,
+
+                HeartsFull = 6,
+                HeartsPartial = HeartState.OneQuarter_NoEmpty,
+                HeartsEmpty = 0,
+
+                StaminaFullWheels = 1,
+                StaminaCurrentRemaining = 4,
+                StaminaCurrentUsed = 1,
+                StaminaEmptyWheels = 0,
+
+                FatiguePercent = 0,
+            },
+            new CharacterStatus
+            {
+                Name = "Gazra",
+                Color = "Red",
+
+                MagicPercent = 100,
+                MagicDamagePercent = 0,
+
+                HeartsFull = 6,
+                HeartsPartial = HeartState.OneQuarter_NoEmpty,
+                HeartsEmpty = 0,
+
+                StaminaFullWheels = 1,
+                StaminaCurrentRemaining = 3,
+                StaminaCurrentUsed = 1,
+                StaminaEmptyWheels = 0,
+
+                FatiguePercent = 0,
+            },
+            new CharacterStatus
+            {
+                Name = "Koja",
+                Color = "Green",
+
+                MagicPercent = 100,
+                MagicDamagePercent = 0,
+
+                HeartsFull = 5,
+                HeartsPartial = HeartState.TwoQuarter_NoEmpty,
+                HeartsEmpty = 0,
+
+                StaminaFullWheels = 0,
+                StaminaCurrentRemaining = 18,
+                StaminaCurrentUsed = 0,
+                StaminaEmptyWheels = 0,
+
+                FatiguePercent = 0,
+            },
+            new CharacterStatus
+            {
+                Name = "Jedal",
+                Color = "Green",
+
+                MagicPercent = 100,
+                MagicDamagePercent = 0,
+
+                HeartsFull = 5,
+                HeartsPartial = HeartState.ThreeQuarter_NoEmpty,
+                HeartsEmpty = 0,
+
+                StaminaFullWheels = 1,
+                StaminaCurrentRemaining = 3,
+                StaminaCurrentUsed = 1,
+                StaminaEmptyWheels = 0,
+
+                FatiguePercent = 0,
+            },
+            new CharacterStatus
+            {
+                Name = "Ryn",
+                Color = "Blue",
+
+                MagicPercent = 100,
+                MagicDamagePercent = 0,
+
+                HeartsFull = 5,
+                HeartsPartial = HeartState.TwoQuarter_NoEmpty,
+                HeartsEmpty = 0,
+
+                StaminaFullWheels = 1,
+                StaminaCurrentRemaining = 1,
+                StaminaCurrentUsed = 0,
+                StaminaEmptyWheels = 0,
+
+                FatiguePercent = 0,
+            },
+            new CharacterStatus
+            {
+                Name = "Kellin",
+                Color = "Blue",
+
+                MagicPercent = 100,
+                MagicDamagePercent = 0,
+
+                HeartsFull = 5,
+                HeartsPartial = HeartState.TwoQuarter_NoEmpty,
+                HeartsEmpty = 0,
+
+                StaminaFullWheels = 0,
+                StaminaCurrentRemaining = 19,
+                StaminaCurrentUsed = 0,
+                StaminaEmptyWheels = 0,
+
+                FatiguePercent = 0,
+            },
+        }
+    };
+}
+
+<div style="display:flex;justify-content:center;align-items:center;">
+    <div style="width:100%;">
+        <div style="background-color: whitesmoke; color: black; border-style: inset; border-width: 5px; border-radius: 25px; max-width: 1200px">
+            <div style="display:flex;justify-content:center;align-items:center;">
+                <h2 style="font-family: algerian">Void Power: <span style="color:darkmagenta">???</span></h2>
+            </div>
+            <div style="display:flex;justify-content:center;align-items:center; margin: -25px 0 -25px 0">
+                <h2 style="font-family: algerian">Stored Magic: <span style="color:darkgreen">@status.CurrentStoredMagic</span></h2>
+            </div>
+            <div style="margin: 0">
+                <hr />
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px">
+                    @foreach (var character in @status.Characters)
+                    {
+                        var color = character.Color == "Blue" ? "paleturquoise"
+                            : character.Color == "Green" ? "palegreen"
+                            : character.Color == "Red" ? "palevioletred"
+                            : character.Color == "Yellow" ? "palegoldenrod"
+                            : "gray";
+                        <div style="height: 200px; margin: 10px 0 0 0; border-style: outset; border-width: 5px; border-radius: 25px; background-color: @color">
+                            @Html.Partial("CharacterStatus", character)
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

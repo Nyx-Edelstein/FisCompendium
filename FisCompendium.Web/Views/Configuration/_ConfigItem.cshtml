@@ -1,0 +1,9 @@
+﻿@model FisCompendium.Data.System_Data.ConfigItem
+
+@using (Html.BeginForm("UpdateConfigItem", "Configuration"))
+{
+    @Html.TextBoxFor(x => x.Key, new { @class = "form-control", autocomplete = "off" })
+    @Html.TextBoxFor(x => x.Value, new { @class = "form-control", autocomplete = "off" })
+    <input type="submit" />
+    <hr />
+}

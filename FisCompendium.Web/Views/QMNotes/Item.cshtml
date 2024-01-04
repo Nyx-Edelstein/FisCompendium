@@ -1,0 +1,44 @@
+﻿@model FisCompendium.Data.Game_Data.QMNote
+
+@{
+    ViewBag.Title = "QM Notes";
+}
+
+
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <a href="/QMNotes/Edit?itemId=@Model.QMNoteId" style="font-weight: bold"><h4>&rArr; @Model.Title</h4></a><h5>@Model.TagsRaw.Replace(",", ", ")</h5>
+        @if (Model.Archived)
+        {
+            <h6>&#128274; (Archived)</h6>
+        }
+    </div>
+    <div>
+        <div id="item-markup" class="well well-sm" style="width: 100%"></div>
+        <div id="item-text" class="hidden">@Model.Notes</div>
+    </div>
+    <h5>&nbsp;Last Edit: @Model.LastEdited</h5>
+</div>
+
+
+<script type="text/javascript" src="~/lib/showdownjs/showdown.min.js" asp-append-version="true"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var converter = new showdown.Converter();
+
+        var text = $('#item-text').text();
+        var text_html = converter.makeHtml(text);
+        $('#item-markup').html(text_html);
+    });
+
+    var converter = new showdown.Converter();
+    function updatePreview() {
+        $('#new-note-markdown-container').show();
+        $('#new-note-details').hide();
+
+        var text_raw = $('#new-note-raw').val();
+        var text_html = converter.makeHtml(text_raw);
+
+        $('#new-note-markdown').html(text_html);
+    }
+</script>

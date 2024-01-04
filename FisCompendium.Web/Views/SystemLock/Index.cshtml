@@ -1,0 +1,12 @@
+﻿@{
+    var systemLock = ViewData["SystemLock"] as bool? ?? false;
+    var systemLockText = systemLock ? "System is currently locked." : "System is currently active.";
+
+    ViewBag.Title = systemLockText;
+}
+
+<h3>Lock System?</h3>
+@using (Html.BeginForm("Lock", "SystemLock"))
+{
+    <input type="submit" class="btn btn-primary float-left" style="margin-top: 15px" />
+}

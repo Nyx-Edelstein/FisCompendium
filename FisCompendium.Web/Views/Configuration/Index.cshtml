@@ -1,0 +1,11 @@
+﻿@using FisCompendium.Data.System_Data
+@model System.Collections.Generic.List<FisCompendium.Data.System_Data.ConfigItem>
+@{
+    ViewBag.Title = "Configuration Items";
+}
+
+@foreach (var configItem in Model)
+{
+    @Html.Partial("_ConfigItem", configItem);
+}
+@Html.Partial("_ConfigItem", new ConfigItem{Key = "<NEW ITEM>"})

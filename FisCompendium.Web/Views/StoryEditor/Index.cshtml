@@ -1,0 +1,92 @@
+﻿@using FisCompendium.Web.Controllers
+@{
+    var PreviewText = ViewData["PreviewText"] as string ?? "";
+}
+
+<h2 class="text-center">Preview</h2>
+<hr />
+<div style="display:flex; justify-content:center; align-items:center;">
+    <div style="width: 800px; height: 450px; overflow-y: scroll; font-size: 16px;" id="previewArea">
+        
+    </div>
+</div>
+<hr/>
+<div style="display:flex; justify-content:center; align-items:center;">
+    <div style="width: 800px; font-size: 16px;">
+        <textarea id="markupInput" style="width: 800px; height: 300px;"></textarea>
+        <div style="height: 50px;">
+            <h4 id="statusText" class="text-center">&nbsp;</h4>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function parse(text) {
+        var lines = text.split("\n");
+        var html = "";
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            line = line.replace("\r", "").replace("\n", "");
+            if (line.length === 0) {
+                html += "<br/><br/>\r\n";
+            } else if (line.startsWith("\\c:")) {
+                html += "<div style=\"display:flex;justify-content:center;align-items:center;\">" + line.substr(3) + "</div>\r\n<br/>\r\n";
+            }
+            else if (line.startsWith("#")) {
+                html += "<span style=\"color: red;\">" + line.substr(1) + "</span>\r\n";
+            } else {
+                html += "<span>" + line + "</span>\r\n";
+            }
+        }
+        html = html.replace(/\/\"/g, "&ldquo;");
+        html = html.replace(/\"\//g, "&rdquo;");
+        html = html.replace(/\/\'/g, "&lsquo;");
+        html = html.replace(/\'\//g, "&rsquo;");
+        html = html.replace(/\-\-/g, "—");
+        html = html.replace(/\.\.\./g, "&hellip;");
+        html = html.replace(/\/\*/g, "<i>");
+        html = html.replace(/\*\//g, "</i>");
+        html = html.replace(/\/\#/g, "<b>");
+        html = html.replace(/\#\//g, "</b>");
+        html = html.replace(/\/_/g, "<u>");
+        html = html.replace(/_\//g, "</u>");
+        html = html.replace(/\/\-/g, "<s>");
+        html = html.replace(/\-\//g, "</s>");
+        return html;
+    }
+
+    var dirty = false;
+    function saveText() {
+        if (!dirty) return;
+        var text = $('#markupInput').val();
+        localStorage.setItem("editorText", text);
+        $('#statusText').fadeOut(function () {
+            $(this).html("&#10004;").fadeIn();
+        });
+        dirty = false;
+    }
+
+    function loadText() {
+        var text = localStorage.getItem("editorText");
+        $('#markupInput').val(text);
+    }
+
+    function update() {
+        var markup = $('#markupInput').val();
+        var html = parse(markup);
+        $('#previewArea').html(html);
+
+        dirty = true;
+        $('#statusText').fadeOut(function () {
+            $(this).html("&nbsp;").fadeIn();
+        });
+    }
+
+    $(document).ready(function () {
+        loadText();
+        update();
+        $('#markupInput').keyup(update);
+        setInterval(saveText, 10000);
+    });
+
+</script>

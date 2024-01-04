@@ -1,0 +1,34 @@
+﻿@model FisCompendium.Web.Models.Account.AccountUpdatePreferences
+
+@{
+    ViewBag.Title = "Update Preferences";
+}
+
+<div>
+    @using (Html.BeginForm("UpdatePreferences", "Account", FormMethod.Post))
+    {
+        @Html.HiddenFor(x => x.RedditUsername)
+        @Html.CheckBoxFor(x => x.Subscribed, new { style = "float: left; width: 20px" })
+        <span style="display: block;">I would like to subscribe to story updates.</span>
+        @Html.CheckBoxFor(x => x.UselessCheckboxPreference, new { style = "float: left; width: 20px" })
+        <span style="display: block;">I would prefer for this checkbox to be checked.</span>
+        <br />
+        <input type="submit" class="btn btn-primary" />
+    }
+
+    <hr />
+    <h3>Linked Reddit Account:</h3>
+    <br />
+    @if (string.IsNullOrWhiteSpace(Model.RedditUsername))
+    {
+        <span style="font-size: medium;"><strong class="text-danger">&times;</strong> Your Reddit account has not yet been linked.</span>
+        <br /><br />
+        <a href="@Url.Action("LinkRedditAccount", "Account")" target="_blank">Click here to link your account.</a>
+    }
+    else
+    {
+        <span style="font-size: medium;"><strong class="text-success">&#10004;</strong> Your Reddit username is: @Model.RedditUsername</span>
+        <br /><br />
+        <a href="@Url.Action("LinkRedditAccount", "Account")" target="_blank">Click here to re-link your account.</a>
+    }
+</div>

@@ -1,0 +1,96 @@
+﻿@using Newtonsoft.Json
+@using FisCompendium.Data;
+@using FisCompendium.Data.User_Data
+@model FisCompendium.Web.Models.PlayerPoints.PlayerPointsUpdate
+
+@{
+    ViewBag.Title = "Player Point Management";
+    var validUsers = ViewData["ValidPlayerNames"] as List<string>;
+    var playerLogEntries = ViewData["PlayerLog"] as List<PlayerLogEntry>;
+}
+
+<div class="row">
+    <div class="col-lg-1 hidden-md" style="min-width: 50px"></div>
+    <div class="col-lg-3 col-md-12" style="margin: 0 0 50px 0">
+        <!--Form-->
+        <div style="width: 350px">
+            <h2><u>Enter users to edit points:</u></h2><br/>
+            @using (Html.BeginForm("Update", "PlayerPoints", FormMethod.Post))
+            {
+                @Html.TextBoxFor(x => x.PlayerNames)
+                <div class="text-danger">
+                    @Html.ValidationMessageFor(x => x.PlayerNames)
+                </div>
+                <details id="parseTool">
+                    <summary>Parse Reddit Thread</summary>
+                    <div style="margin: 0 0 0 50px; width: 200px">
+                        <h5>Paste div:</h5>
+                        <textarea id="pastedData"></textarea>
+                        <br/>
+                        <button type="button" id="parseButton" class="btn btn-primary" style="width: 164px">Parse</button>
+                    </div>
+                </details>
+                <hr/>
+                @Html.TextBoxFor(x => x.Reason, new {@class = "form-control", @placeholder = "Reason"})
+                <div class="text-danger">
+                    @Html.ValidationMessageFor(x => x.Reason)
+                </div>
+                @Html.TextBoxFor(x => x.PointChange, new {@class = "form-control", @placeholder = "Point Change"})
+                <input type="submit" class="btn btn-primary" style="width: 350px"/>
+            }
+            <br/>
+            <hr/>
+            <br/>
+            <h4>Release pending points:</h4>
+            <br/>
+            @using (Html.BeginForm("ReleasePendingPoints", "PlayerPoints", FormMethod.Post))
+            {
+                <input type="submit" class="btn btn-primary" style="width: 350px"/>
+            }
+        </div>
+    </div>
+    <div class="col-lg-1 col-md-2 hidden-sm" style="min-width: 250px"></div>
+    <div class="col-lg-4 col-md-12">
+        <!--Log-->
+        <h2><u>Recent Points Changes</u></h2>
+        <div class="well-sm" style="max-height: 600px; overflow-y: auto;">
+            @foreach (var logEntry in playerLogEntries)
+            {
+                <p><span style="color: darkgray">@logEntry.Timestamp:</span><br/><span class="text-highlight">@logEntry.Message</span></p>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        $("#PlayerNames").tagit({
+            fieldName: "PlayerNames",
+            availableTags: @Html.Raw(JsonConvert.SerializeObject(validUsers)),
+            caseSensitive: false
+        });
+        $('#parseButton').click(function (event) {
+            var pastedText = $('#pastedData').val();
+
+            var re = /(?:data-author=\"(.*)\")(.*)(?:data-author-fullname)/g;
+            var match = re.exec(pastedText);
+            var individualUsernames = [];
+            while (match != null) {
+                individualUsernames.push(match[1].trim());
+                var match = re.exec(pastedText);
+            }
+
+            var uniqueNames = individualUsernames.filter(function(item, pos) {
+                return individualUsernames.indexOf(item) == pos;
+            });
+
+            //console.log(uniqueNames);
+
+            uniqueNames.forEach(function(item) {
+                $("#PlayerNames").tagit("createTag", item);
+            });
+            $('#parseTool').removeAttr("open");
+        });
+    </script>
+}

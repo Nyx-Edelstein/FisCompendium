@@ -1,0 +1,88 @@
+﻿@using System.Security.Claims
+@using FisCompendium.Data.User_Data
+@using Newtonsoft.Json
+
+@model FisCompendium.Data.Game_Data.KnowledgeItem;
+@{
+    ViewBag.Title = "Knowledge Compendium";
+
+    var existingTags = ViewData["ExistingTags"] as List<string> ?? new List<string>();
+
+    var formControl = new { @@class = "form-control", autocomplete = "off" };
+    var textControl = new { @@class = "form-control", autocomplete = "off", rows = "12" };
+}
+
+@using (Html.BeginForm("New", "Knowledge"))
+{
+    <div class="text-center">
+        <div class="row" style="margin-bottom: 0px">
+            <div class="col-md-1">
+                <h4 class="float-right">Title:</h4>
+            </div>
+            <div class="col-md-8">
+                @Html.TextBoxFor(x => x.Title, formControl)
+            </div>
+            <div class="col-md-3 text-danger">
+                @Html.ValidationMessageFor(x => x.Title)
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-1">
+                <h4 class="float-right">Tags:</h4>
+            </div>
+            <div class="col-md-8">
+                @Html.TextBoxFor(x => x.TagsRaw, formControl)
+            </div>
+            <div class="col-md-3 text-danger">
+                @Html.ValidationMessageFor(x => x.TagsRaw)
+            </div>
+        </div>
+        <div class="row" style="margin-top: -8px">
+            <div class="col-md-1">
+                <h4 class="float-right">Data:</h4>
+            </div>
+            <div class="col-md-8">
+                @Html.TextAreaFor(x => x.Data, textControl)
+            </div>
+            <div class="col-md-3 text-danger">
+                @Html.ValidationMessageFor(x => x.Data)
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-1">&nbsp;</div>
+            <div class="col-md-1">
+                <div class="float-left">
+                    @Html.CheckBoxFor(x => x.Archived, textControl)
+                    <h4>Archive?</h4>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <input type="submit" class="btn btn-primary float-right" style="margin-top: 15px" />
+            </div>
+        </div>
+    </div>
+}
+<hr />
+<h3>Data Preview:</h3>
+<div class="well well-sm" id="preview"></div>
+
+<script type="text/javascript" src="~/lib/showdownjs/showdown.min.js" asp-append-version="true"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#Data').keyup(function () {
+            var text = $('#Data').val();
+            var converter = new showdown.Converter();
+            var text_html = converter.makeHtml(text);
+            $("#preview").html(text_html);
+        });
+
+        $("#TagsRaw").tagit({
+            fieldName: "TagsRaw",
+            availableTags: @Html.Raw(JsonConvert.SerializeObject(existingTags)),
+            caseSensitive: false
+        });
+    });
+</script>

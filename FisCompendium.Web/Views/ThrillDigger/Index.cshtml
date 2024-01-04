@@ -1,0 +1,232 @@
+﻿@using ThrillDigger.Enum
+@using ThrillDigger.Models
+@model FisCompendium.Web.Models.ThrillDigger.ThrillDiggerModel
+@{
+    ViewBag.Title = "Thrill Digger - Solver";
+
+    var game = (GameGrid)ViewData["GameGrid"];
+
+    Func<decimal, string> format = d => (d * 100).ToString("0.##");
+    Func<decimal, string> format2 = d => d.ToString("0.##");
+}
+
+<style>
+    .divTable {
+        display: table;
+        background-color: tan
+    }
+
+    .divTableRow {
+        display: table-row;
+    }
+
+    .divTableHeading {
+        background-color: #EEE;
+        display: table-header-group;
+    }
+
+    .divTableCell, .divTableHead {
+        border: 1px solid #999999;
+        display: table-cell;
+        padding: 2px 10px;
+        width: 120px;
+        height: 90px;
+    }
+
+    .divTableHeading {
+        background-color: #EEE;
+        display: table-header-group;
+        font-weight: bold;
+    }
+
+    .divTableFoot {
+        background-color: #EEE;
+        display: table-footer-group;
+        font-weight: bold;
+    }
+
+    .divTableBody {
+        display: table-row-group;
+    }
+</style>
+
+<div class="divTable" style="border: 5px solid #000;">
+    <div class="divTableBody">
+        @for (var row = 0; row < 5; row++)
+        {
+            <div class="divTableRow">
+                @for (var col = 0; col < 8; col++)
+                {
+                    var node = game.Grid[row, col];
+                    if (node.State == NodeState.Green)
+                    {
+                        <div class="divTableCell">
+                            <div style="display:flex;justify-content:center;align-items:center;">
+                                <img width="45" src="img/rupees/green.png" />
+                            </div>
+                        </div>
+                    }
+                    else if (node.State == NodeState.Blue)
+                    {
+                        <div class="divTableCell">
+                            <div style="display:flex;justify-content:center;align-items:center;">
+                                <img width="45" src="img/rupees/blue.png" />
+                            </div>
+                        </div>
+                    }
+                    else if (node.State == NodeState.Red)
+                    {
+                        <div class="divTableCell">
+                            <div style="display:flex;justify-content:center;align-items:center;">
+                                <img width="45" src="img/rupees/red.png" />
+                            </div>
+                        </div>
+                    }
+                    else if (node.State == NodeState.Silver)
+                    {
+                        <div class="divTableCell">
+                            <div style="display:flex;justify-content:center;align-items:center;">
+                                <img width="45" src="img/rupees/silver.png" />
+                            </div>
+                        </div>
+                    }
+                    else if (node.State == NodeState.Gold)
+                    {
+                        <div class="divTableCell">
+                            <div style="display:flex;justify-content:center;align-items:center;">
+                                <img width="45" src="img/rupees/gold.png" />
+                            </div>
+                        </div>
+                    }
+                    else if (node.State == NodeState.Rupoor)
+                    {
+                        <div class="divTableCell">
+                            <div style="display:flex;justify-content:center;align-items:center;">
+                                <img width="45" src="img/rupees/rupoor.png" />
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        var borderColor = node.Preferred ? "gold" : "#999999";
+                        var borderWidth = node.Preferred ? "3px" : "1px";
+
+                        <div id="node-@row-@col" class="divTableCell node" style="border-color: @borderColor; border-width: @borderWidth" data-row="@row" data-col="@col" data-pBad="@format(node.P_Bad)" data-pGreen="@format(node.P_RupeeGreen)" data-pBlue="@format(node.P_RupeeBlue)" data-pRed="@format(node.P_RupeeRed)" data-pSilver="@format(node.P_RupeeSilver)" data-pGold="@format(node.P_RupeeGold)" data-exp="@format2(node.ExpectedValue)"><canvas id="node-@row-@col-canvas" width="100px" height="100px" style="margin: -10px 0 0 0"></canvas></div>
+                    }
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<div id="submit-group" class="btn-group btn-group-justified" style="width: 985px; display: none;">
+    <a id="submitGreen" href="#" class="btn btn-default"><img width="45" height="72" style="margin: 5px 0px 0px 0px" src="img/rupees/green.png" /></a>
+    <a id="submitBlue" href="#" class="btn btn-default"><img width="45" height="72" style="margin: 5px 0px 0px 0px" src="img/rupees/blue.png" /></a>
+    <a id="submitRed" href="#" class="btn btn-default"><img width="45" height="72" style="margin: 5px 0px 0px 0px" src="img/rupees/red.png" /></a>
+    <a id="submitSilver" href="#" class="btn btn-default"><img width="45" height="72" style="margin: 5px 0px 0px 0px" src="img/rupees/silver.png" /></a>
+    <a id="submitGold" href="#" class="btn btn-default"><img width="45" height="72" style="margin: 5px 0px 0px 0px" src="img/rupees/gold.png" /></a>
+    <a id="submitRupoor" href="#" class="btn btn-default"><img width="45" height="72" style="margin: 5px 0px 0px 0px" src="img/rupees/rupoor.png" /></a>
+</div>
+
+@using (Html.BeginForm("Index", "ThrillDigger"))
+{
+    <input type="hidden" id="Row" name="Row" value="0" />
+    <input type="hidden" id="Col" name="Col" value="0" />
+    <input type="hidden" id="StateChange" name="StateChange" value="Green" />
+    <input type="hidden" name="GameState" value="@Model.GameState" />
+    <input type="submit" id="submit-btn" style="display: none"/>
+}
+
+
+<script src="lib/chartjs/Chart.min.js"></script>
+<script type="text/javascript">
+    function submit(color) {
+        $('#StateChange').val(color);
+        $('#submit-btn').click();
+    }
+    $(document).ready(function () {
+        $('.node').each(function (i, ele) {
+            var bad = $(ele).attr('data-pBad');
+            var green = $(ele).attr('data-pGreen');
+            var blue = $(ele).attr('data-pBlue');
+            var red = $(ele).attr('data-pRed');
+            var silver = $(ele).attr('data-pSilver');
+            var gold = $(ele).attr('data-pGold');
+            var exp = $(ele).attr('data-exp');
+            var id = $(ele).attr('id');
+
+            var data = {
+                labels: ["Bad", "Gold", "Silver", "Red", "Blue", "Green"],
+                datasets: [
+                    {
+                        fill: true,
+                        backgroundColor: [
+                            'black',
+                            'gold',
+                            'silver',
+                            'red',
+                            'blue',
+                            'green'
+                        ],
+                        data: [bad, gold, silver, red, blue, green],
+                        // Notice the borderColor
+                        borderColor: ['black', 'black'],
+                        borderWidth: [2, 2]
+                    }
+                ]
+            };
+
+            var options = {
+                title: {
+                    display: true,
+                    text: exp,
+                    color: 'black',
+                    position: 'top'
+                },
+                legend: {
+                    display: false
+                },
+                rotation: 1.5 * Math.PI
+            };
+
+            var canvas = document.getElementById(id + '-canvas');
+            var ctx = canvas.getContext('2d');
+            var chart = new Chart(ctx, {
+                type: 'pie',
+                data: data,
+                options: options
+            });
+        });
+        $('.node').click(function () {
+            $('.node').css("background-color", "tan");
+            $(this).css("background-color", "darkgoldenrod");
+
+            var row = $(this).attr('data-row');
+            var col = $(this).attr('data-col');
+
+            $('#Row').val(row);
+            $('#Col').val(col);
+            $('#submit-group').fadeIn();
+        });
+
+        $('#submitGreen').click(function () {
+            submit('Green');
+        });
+        $('#submitBlue').click(function () {
+            submit('Blue');
+        });
+        $('#submitRed').click(function () {
+            submit('Red');
+        });
+        $('#submitSilver').click(function () {
+            submit('Silver');
+        });
+        $('#submitGold').click(function () {
+            submit('Gold');
+        });
+        $('#submitRupoor').click(function () {
+            submit('Rupoor');
+        });
+    })
+</script>
+

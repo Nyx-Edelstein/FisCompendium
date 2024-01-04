@@ -1,0 +1,82 @@
+﻿@using FisCompendium.Data
+@using FisCompendium.Data.User_Data
+@model FisCompendium.Web.Models.Account.AccountPermission
+
+@{
+    ViewBag.Title = "User Permissions";
+    var users = (ViewData["Users"] as IEnumerable<UserPermissions>).ToList() ?? new List<UserPermissions>();
+
+    var usersSelectList = users.Where(u => u.UserName != User?.Identity?.Name && u.PermissionsLevel != PermissionsLevel.QM).Select(u => new SelectListItem
+    {
+        Text = u.UserName,
+        Value = u.UserName
+    }).ToList();
+
+    var permissionsSelectList = Enum.GetValues(typeof(PermissionsLevel))
+        .Cast<PermissionsLevel>()
+        .Select(p => new SelectListItem
+        {
+            Text = p.ToString(),
+            Value = p.ToString()
+        }).ToList();
+
+    var qms = users.Where(x => x.PermissionsLevel == PermissionsLevel.QM)
+        .Select(x => x.UserName)
+        .ToList();
+    var trustedPlayers = users.Where(x => x.PermissionsLevel == PermissionsLevel.TrustedPlayer)
+        .Select(x => x.UserName)
+        .ToList();
+}
+
+<div class="row">
+    <div class="col-md-2" style="margin: 0 0 50px 0; width: 350px">
+        <h4>QMs:</h4>
+        <hr />
+        <ul>
+            @foreach (var user in qms)
+            {
+                <li>@user</li>
+            }
+        </ul>
+        <br/>
+        <br/>
+        <h4>Trusted Players:</h4>
+        <hr />
+        @if (trustedPlayers.Any())
+        {
+            <ul>
+                @foreach (var user in trustedPlayers)
+                {
+                    <li>@user</li>
+                }
+            </ul>
+        }
+        else
+        {
+            <ul>
+                <li><i>None</i></li>
+            </ul>
+        }
+    </div>
+    <div class="col-md-1"></div>
+    <div class="col-md-3">
+        <div style="width: 200px">
+            <h4>Update User Role:</h4>
+            <hr/>
+            @using (Html.BeginForm("Update", "Permissions", FormMethod.Post))
+            {
+                @Html.DropDownListFor(x => x.Username, usersSelectList, "Select a User...", new {@class = "form-control", style="height: 45px;"})
+                <div class="text-danger">
+                    @Html.ValidationMessageFor(x => x.Username)
+                </div>
+                @Html.DropDownListFor(x => x.Permissions, permissionsSelectList, "Set Role...", new {@class = "form-control", style = "height: 45px;" })
+                ;
+                <div class="text-danger">
+                    @Html.ValidationMessageFor(x => x.Permissions)
+                </div>
+                <input type="submit" class="btn btn-primary"/>
+            }
+        </div>
+    </div>
+</div>
+

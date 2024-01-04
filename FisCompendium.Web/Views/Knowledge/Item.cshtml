@@ -1,0 +1,153 @@
+﻿@using System.Security.Claims
+@using FisCompendium.Data.User_Data
+@model FisCompendium.Data.Game_Data.KnowledgeItemComposite
+
+@{
+    ViewBag.Title = "Knowledge Compendium";
+
+    var IsTrustedPlayer = User.HasClaim(ClaimTypes.Role, PermissionsLevel.TrustedPlayer.ToString());
+
+    var Username = User?.Identity?.Name ?? "Guest";
+
+    var editorString = string.IsNullOrWhiteSpace(Model.Item.Editor) ? "" : $" by {Model.Item.Editor}";
+}
+
+
+<div class="panel panel-info">
+    <div class="panel-heading">
+        @if (IsTrustedPlayer)
+        {
+            <a href="/Knowledge/Edit?itemId=@Model.Item.KnowledgeItemId" style="font-weight: bold"><h4>&rArr; @Model.Item.Title</h4></a><h5>@Model.Item.TagsRaw.Replace(",", ", ")</h5>
+        }
+        else
+        {
+            <h4>@Model.Item.Title</h4> <h5>@Model.Item.TagsRaw.Replace(",", ", ")</h5>
+        }
+        @if (Model.Item.Archived)
+        {
+            <h6>&#128274; (Archived)</h6>
+        }
+    </div>
+    <div>
+        <div id="item-markup" class="well well-sm" style="width: 100%"></div>
+        <div id="item-text" class="hidden">@Model.Item.Data</div>
+    </div>
+    <h5>&nbsp;Last edited on @(Model.Item.LastEdited + editorString)</h5>
+</div>
+<!--Player Notes-->
+@if (Model.Comments.Any())
+{
+    <hr/>
+    <div>
+        <h4>Comments: </h4>
+    </div>
+    <div id="player-notes" style="margin-top: 15px; height: 100%; overflow-x: hidden;">
+        @foreach (var comment in Model.Comments)
+        {
+            var now = DateTime.UtcNow;
+            var noteCreated = DateTime.Parse(comment.DateCommented.Replace(" (UTC)", ""));
+            string createdStr;
+            if (noteCreated > now.AddMinutes(-2))
+            {
+                createdStr = "just now";
+            }
+            else if (noteCreated > now.AddHours(-1))
+            {
+                createdStr = (now - noteCreated).TotalMinutes.ToString("N0") + " minutes ago";
+            }
+            else if (noteCreated > now.AddDays(-2))
+            {
+                createdStr = (now - noteCreated).TotalHours.ToString("N0") + " hours ago";
+            }
+            else if (noteCreated > now.AddDays(-30))
+            {
+                createdStr = (now - noteCreated).TotalDays.ToString("N0") + " days ago";
+            }
+            else
+            {
+                createdStr = noteCreated.ToString("yyyy/MM/dd hh:mm tt") + " (UTC)";
+            }
+
+            <div class="player-note panel panel-primary">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <div style="margin-top: 5px; margin-left: 2px;">
+                                <span style="font-size: larger; font-weight: bold;">@comment.Username</span>
+                                <span style="font-size: smaller">(@createdStr)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>        
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div id="note-markdown-@comment.Id.AsObjectId" class="notes-markdown well well-sm" style="margin-bottom: 0px; padding-left: 25px; padding-right: 25px;"></div>
+                        <textarea id="note-text-@comment.Id.AsObjectId" class="notes collapse" style="width: 100%; overflow-y: auto" rows="3">@comment.Comment</textarea>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+<!--Add comment-->
+<div id="comment-pane">
+    @if (Username != "Guest")
+    {
+        using (Html.BeginForm("SubmitComment", "Knowledge"))
+        {
+            <input type="hidden" name="KnowledgeItemId" value="@Model.Item.KnowledgeItemId" />
+            <textarea id="new-note-raw" name="Comment" placeholder="Add a comment..." class="form-control" onkeyup="updatePreview();" style="overflow-y: auto; resize: none; width: 100%" rows="5"></textarea>
+            <br />
+            <div id="new-note-details">
+                <ul>
+                    <li>Supports basic html and/or markdown, specifically <a href="http://demo.showdownjs.com/" target="_blank">showdownjs</a>.</li>
+                    <li>Do not abuse this. You will be banned.</li>
+                </ul><br />
+            </div>
+            <div id="new-note-markdown-container" class="collapse">
+                <div class="row">
+                    <div class="col" style="margin-top: -2px; margin-bottom: -3px;">
+                        <h6 class="pull-left"><a href="http://demo.showdownjs.com/" target="_blank">Formatting Guide</a></h6>
+                        <input type="submit" class="btn btn-primary pull-right" />
+                    </div>
+                </div>
+                <h4>Preview:</h4>
+                <div id="new-note-markdown" class="well well-sm" style="max-height: 150px; overflow-y: auto;"></div>
+            </div>
+        }
+    }
+</div>
+
+
+<script type="text/javascript" src="~/lib/showdownjs/showdown.min.js" asp-append-version="true"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var converter = new showdown.Converter();
+
+        var text = $('#item-text').text();
+        var text_html = converter.makeHtml(text);
+        $('#item-markup').html(text_html);
+
+        var text_qm = $('#item-qm-text').text();
+        var text_html_qm = converter.makeHtml(text_qm);
+        $('#item-qm-markup').html(text_html_qm);
+
+        var player_notes_group = $('#player-notes');
+        player_notes_group.children().each(function (i, player_note) {
+            var notes = $(player_note).find('.notes').val();
+            var notes_html = converter.makeHtml(notes);
+            $(player_note).find('.notes-markdown').html(notes_html);
+        });
+    });
+
+    var converter = new showdown.Converter();
+    function updatePreview() {
+        $('#new-note-markdown-container').show();
+        $('#new-note-details').hide();
+
+        var text_raw = $('#new-note-raw').val();
+        var text_html = converter.makeHtml(text_raw);
+
+        $('#new-note-markdown').html(text_html);
+    }
+</script>

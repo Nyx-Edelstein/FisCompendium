@@ -1,0 +1,100 @@
+﻿@using Microsoft.AspNetCore.Mvc.ViewEngines
+@inject ICompositeViewEngine Engine
+@model FisCompendium.Web.Controllers.ChapterData
+@{
+    ViewBag.Title = "Legacy of the Goddess";
+    string DisableIfNull(string s) => s == null ? "disabled" : "";
+    string ChapterLink(string s) => s == null ? "" : Url.Action("Index", new { chapter = s });
+}
+
+@if (Engine.FindView(ViewContext, Model.ViewName, isMainPage: false).Success)
+{
+    <ul class="pager">
+        <li class="@DisableIfNull(Model.Start)"><a class="@DisableIfNull(Model.Start)" href="@ChapterLink(Model.Start)">&#8606; Start</a></li>
+        <li class="@DisableIfNull(Model.Prev)"><a class="@DisableIfNull(Model.Prev)" href="@ChapterLink(Model.Prev)">&larr;</a></li>
+        <li class="@DisableIfNull(Model.Next)"><a class="@DisableIfNull(Model.Next)" href="@ChapterLink(Model.Next)">&rarr;</a></li>
+        <li class="@DisableIfNull(Model.Current)"><a class="@DisableIfNull(Model.Current)" href="@ChapterLink(Model.Current)">Current &#8608;</a></li>
+    </ul>
+
+    if (@Model.HasPlan)
+    {
+
+        <h2 id="ChapterTitle" class="text-center" style="cursor: help"><span id="expand-plan">&#9661;</span><span id="expanded-plan" style="display:none">&#9660;</span> @Model.Title</h2>
+        <div id="ChapterPlan" style="display:none">
+            <hr />
+            <div style="display:flex; justify-content:center; align-items:center;">
+                <div class="well" style="width: 800px; font-size: 16px;">
+                    @* ReSharper disable once Mvc.PartialViewNotResolved *@
+                    <partial name="Plans/@Model.ViewName" />
+                </div>
+            </div>
+        </div>
+        <hr />
+        <script type="text/javascript">
+            $(document).ready(function () {
+                var expanded = false;
+                $("#ChapterTitle").click(function () {
+                    if (expanded) {
+                        $("#expand-plan").show();
+                        $("#expanded-plan").hide();
+                        $("#ChapterPlan").slideUp(200);
+                    } else {
+                        $("#expand-plan").hide();
+                        $("#expanded-plan").show();
+                        $("#ChapterPlan").slideDown(200);
+                    }
+                    expanded = !expanded;
+                });
+            });
+        </script>
+    }
+    else
+    {
+        <h2 class="text-center">@Model.Title</h2>
+        <hr />
+    }
+    <div style="display:flex; justify-content:center; align-items:center;">
+        <div style="max-width: 800px; font-size: 16px;">
+            <partial name="@Model.ViewName" />
+        </div>
+    </div>
+
+    <ul class="pager">
+        <li class="@DisableIfNull(Model.Start)"><a class="@DisableIfNull(Model.Start)" href="@ChapterLink(Model.Start)">&#8606; Start</a></li>
+        <li class="@DisableIfNull(Model.Prev)"><a class="@DisableIfNull(Model.Prev)" href="@ChapterLink(Model.Prev)">&larr;</a></li>
+        <li class="@DisableIfNull(Model.Next)"><a class="@DisableIfNull(Model.Next)" href="@ChapterLink(Model.Next)">&rarr;</a></li>
+        <li class="@DisableIfNull(Model.Current)"><a class="@DisableIfNull(Model.Current)" href="@ChapterLink(Model.Current)">Current &#8608;</a></li>
+    </ul>
+}
+else
+{
+    <ul class="pager">
+        <li><a href="@Url.Action("Index", new {chapter = "TOC"})">&#8606; Start</a></li>
+        <li class="disabled"><a class="disabled" href="">&larr;</a></li>
+        <li class="disabled"><a class="disabled" href="">&rarr;</a></li>
+        <li><a href="@Url.Action("Index", new {chapter = "End"})">Current &#8608;</a></li>
+    </ul>
+
+    <h2 class="text-center">Chapter 404</h2>
+    <hr />
+
+    <div style="display:flex; justify-content:center; align-items:center;">
+        <div style="max-width: 800px; font-size: 16px" font-family="serif">
+            <br /><br />
+            <br /><br />
+            <br /><br />
+            <span>(The page appears to be blank.)</span>
+            <br /><br />
+            <br /><br />
+            <br /><br />
+        </div>
+    </div>
+
+    <ul class="pager">
+        <li><a href="@Url.Action("Index", new {chapter = "TOC"})">&#8606; Start</a></li>
+        <li class="disabled"><a class="disabled" href="">&larr;</a></li>
+        <li class="disabled"><a class="disabled" href="">&rarr;</a></li>
+        <li><a href="@Url.Action("Index", new {chapter = "End"})">Current &#8608;</a></li>
+    </ul>
+}
+

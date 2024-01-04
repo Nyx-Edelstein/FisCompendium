@@ -1,0 +1,183 @@
+﻿@using FisCompendium.Data.Game_Data;
+
+@model List<QMNoteIndex>
+@{
+    ViewBag.Title = "QM Notes";
+
+    var preferredSearchView = Context.Request.Cookies["PreferredSearchView"] ?? "list";
+    var listViewActive = preferredSearchView == "list" ? "active" : "";
+    var conditionalHideListView = preferredSearchView != "list" ? "display: none" : "";
+    var categoryViewActive = preferredSearchView != "list" ? "active" : "";
+    var conditionalHideCategoryView = preferredSearchView == "list" ? "display: none" : "";
+}
+
+<div style="min-height: 1000px">
+    <div class="text-center">
+        <div>
+            @Html.ActionLink("New Entry", "New", new { }, new { @class = "btn btn-primary", target = "_blank" })
+        </div>
+        <div style="display: block; width: 100%">
+            <span style="font-size: 36px;">&#x2315;</span>
+            <input type="text" id="searchString" placeholder="Comma, Delimited, Search" style="min-width: 315px; height: 35px"><br />
+        </div>
+        <div>
+            <ul class="nav nav-pills">
+                <li id="list-view" class="@listViewActive">
+                    <a href="#">List View</a>
+                </li>
+                <li id="category-view" class="@categoryViewActive">
+                    <a href="#">Category View</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <hr />
+    <div id="search-results" style="width: 100%; @conditionalHideListView">
+        @foreach (var item in Model)
+        {
+            var lockText = item.Archived ? "&#128274; (Archived)" : "";
+            <div id="item-@item.QMNoteId" class="index-item" data-title="@item.Title" data-tags="@item.TagsRaw" data-score="0">
+                <a href="/QMNotes/Item?itemId=@item.QMNoteId&title=@Html.UrlEncoder.Encode(item.Title)" style="color: #A0C0D0; font-weight: bold"><h4>&rArr; @Html.Raw(lockText) @item.Title </h4></a>
+                <h5>@item.TagsRaw.Replace(",", ", ")</h5>
+            </div>
+        }
+    </div>
+    <div id="category-results" style="width: 100%; @conditionalHideCategoryView"></div>
+</div>
+
+<script type="text/javascript">
+    function DoSearch(text) {
+        //Score each entry based on title, tag hits
+        $("#search-results").find(".index-item").each(function (i, ele) {
+            var score = 0;
+            var searchTerms = text.split(",");
+            searchTerms.forEach(function (term) {
+                term = term.trim();
+
+                //Title matches
+                var title = $(ele).data("title").toLowerCase();
+                if (title === term) score += 25;
+                else if (title.indexOf(term) >= 0 || term.indexOf(title) >= 0) score += 1;
+
+                //Tag matches
+                var tags = $(ele).data("tags").toLowerCase().split(',');
+                tags.forEach(function (tag) {
+                    tag = tag.trim();
+                    if (tag.toLowerCase() === term.toLowerCase()) score += 5;
+                    else if (tag.indexOf(term) >= 0) score += 1;
+                });
+            });
+            $(ele).attr("data-score", score);
+        });
+
+        //Order entries
+        var items = $('#search-results').find(".index-item");
+        items.sort(function (a, b) {
+            var scoreA = parseInt($(a).attr('data-score'));
+            var scoreB = parseInt($(b).attr('data-score'));
+            return (scoreA < scoreB) ? 1 : (scoreA > scoreB) ? -1 : 0;
+        });
+        $('#search-results').html(items);
+
+        //Hide entries with score = 0
+        $('#search-results').find(".index-item").each(function (i, ele) {
+            $(ele).show();
+            var score = $(ele).data("score");
+            if (score === 0) $(ele).hide();
+        });
+    }
+
+    function UpdateCategoryView() {
+        //Get list of tags
+        var tagsRaw = "";
+        $('#search-results').find('.index-item').filter(function () {
+            return $(this).css("display") !== "none";
+        }).each(function (i, ele) {
+            tagsRaw += $(ele).data("tags").toLowerCase() + ',';
+        });
+
+        //remove duplicates (it's already ordered by search score)
+        var tags = tagsRaw.split(',');
+        var uniqueTags = [];
+        $.each(tags, function (i, tag) {
+            if (tag.length > 0 && $.inArray(tag, uniqueTags) === -1) uniqueTags.push(tag);
+        });
+
+        //Clear category results
+        $('#category-results').empty();
+
+        //Build category view
+        $.each(uniqueTags, function (i, tag) {
+            var aggregateHtml = "";
+            $('#search-results').find('.index-item').filter(function () {
+                return $(this).css("display") !== "none";
+            }).filter(function (n, item) {
+                var eleTags = $(item).data("tags").toLowerCase();
+                return eleTags.includes(tag);
+            }).each(function (n, ele) {
+                aggregateHtml += $(ele).find('a').prop('outerHTML');
+            });
+
+            $('#category-results').append("<details open><summary>" + tag + "</summary>" + aggregateHtml + "</details><br>");
+        });
+    }
+
+    function setPreference(pref) {
+        var exdate = new Date();
+        exdate.setDate(exdate.getDate() + 3650);
+        var c_value = pref + "; expires=" + exdate.toUTCString();
+        document.cookie = "PreferredSearchView" + "=" + c_value;
+    }
+
+    function showListView() {
+        $('#list-view').addClass('active');
+        $('#category-view').removeClass('active');
+        $('#category-results').fadeOut();
+        $('#search-results').fadeIn();
+        setPreference("list");
+    }
+
+    function showCategoryView() {
+        $('#category-view').addClass('active');
+        $('#list-view').removeClass('active');
+        $('#search-results').fadeOut();
+        $('#category-results').fadeIn();
+        setPreference("category");
+    }
+
+    var lastText = "";
+    $(document).ready(function () {
+        $('#searchString').focus();
+        $('#searchString').keyup(function () {
+            var text = $('#searchString').val();
+            if (text.length === 0) {
+
+                var items = $('#search-results').find(".index-item");
+                items.sort(function (a, b) {
+                    var titleA = $(a).data('title');
+                    var titleB = $(b).data('title');
+                    return (titleA < titleB) ? -1 : (titleA > titleB) ? 1 : 0;
+                });
+                $('#search-results').html(items);
+
+                $('#search-results').find(".index-item").each(function (i, ele) {
+                    $(ele).show();
+                });
+
+                UpdateCategoryView();
+            }
+            if (text === lastText) return;
+            if (text.length < 3) return;
+
+            lastText = text;
+
+            DoSearch(text.toLowerCase());
+            UpdateCategoryView();
+        });
+
+        $('#list-view').click(showListView);
+        $('#category-view').click(showCategoryView);
+
+        UpdateCategoryView();
+    });
+</script>

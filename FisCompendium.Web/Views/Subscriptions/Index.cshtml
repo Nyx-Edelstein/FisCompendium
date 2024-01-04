@@ -1,0 +1,18 @@
+﻿@{
+    ViewBag.Title = "Subscribed Users";
+    var emails = ViewData["Emails"] as string[] ?? new string[] { };
+}
+
+@if (!emails.Any())
+{
+    <h5>No subscribers.</h5>
+}
+else
+{
+    <h5>
+        @foreach (var email in emails)
+        {
+            @(email + "; ")
+        }
+    </h5>
+}

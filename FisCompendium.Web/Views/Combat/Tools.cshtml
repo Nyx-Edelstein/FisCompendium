@@ -1,0 +1,348 @@
+﻿@{
+    ViewBag.Title = "Combat Tools";
+}
+
+<div style="display:flex; justify-content:center; align-items:center;">
+    <div style="min-width: 450px;">
+        <h3 style="text-align: center"><u>Resolution Calculator:</u></h3>
+        <br />
+        <table style="width: 100%; margin: 0 0 0 0">
+            <tbody>
+                <tr>
+                    <td>&nbsp;</td>
+                    <th style="text-align:center">Character A</th>
+                    <th style="text-align:center">Character B</th>
+                </tr>
+                <tr>
+                    <th style="text-align:right">Skill Level:</th>
+                    <td style="text-align:center">
+                        <input style="width: 65px; text-align: center" type="number" min="1" value="10" id="A_Skill" />
+                    </td>
+                    <td style="text-align:center">
+                        <input style="width: 65px; text-align: center" type="number" min="1" value="10" id="B_Skill" />
+                    </td>
+                </tr>
+                <tr>
+                    <th style="text-align:right">Stress Cap:</th>
+                    <td style="text-align:center">
+                        <input style="width: 65px; text-align: center" type="number" min="1" value="20" id="A_Cap" />
+                    </td>
+                    <td style="text-align:center">
+                        <input style="width: 65px; text-align: center" type="number" min="1" value="20" id="B_Cap" />
+                    </td>
+                </tr>
+                <tr>
+                    <th style="text-align:right">Modifier %:</th>
+                    <td style="text-align:center">
+                        <input style="width: 65px; text-align: center" type="number" min="0.0" value="1.0" id="A_Mod" />
+                    </td>
+                    <td style="text-align:center">
+                        <input style="width: 65px; text-align: center" type="number" min="0.0" value="1.0" id="B_Mod" />
+                    </td>
+                </tr>
+                <tr>
+                    <th style="text-align:right">Bonus:</th>
+                    <td style="text-align:center">
+                        <input style="width: 65px; text-align: center" type="number" min="0" value="0" id="A_Bonus" />
+                    </td>
+                    <td style="text-align:center">
+                        <input style="width: 65px; text-align: center" type="number" min="0" value="0" id="B_Bonus" />
+                    </td>
+                </tr>
+                <tr>
+                    <th style="text-align: right; height: 26px">Fudge:</th>
+                    <td style="text-align:center">
+                        <span style="width: 65px; text-align: center" id="A_Fudge">N/A</span>
+                    </td>
+                    <td style="text-align:center">
+                        <span style="width: 65px; text-align: center" id="B_Fudge">N/A</span>
+                    </td>
+                </tr>
+                <tr>
+                    <th style="text-align: right; height: 26px">Total:</th>
+                    <td style="text-align:center">
+                        <span style="width: 65px;" id="A_Total">N/A</span>
+                    </td>
+                    <td style="text-align:center">
+                        <span style="width: 65px;" id="B_Total">N/A</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <hr />
+        <table style="width: 100%; margin: 0 0 0 -20px">
+            <tbody>
+                <tr>
+                    <th style="text-align:right">Outcome</th>
+                    <th style="text-align:center">Threshold</th>
+                    <th style="text-align:left">Stress</th>
+                </tr>
+                <tr>
+                    <td style="text-align:right">
+                        <span style="width: 65px;" id="Outcome">N/A</span>
+                    </td>
+                    <td style="text-align:center">
+                        <span style="width: 65px;" id="Threshold">N/A</span>
+                    </td>
+                    <td style="text-align:left">
+                        <span style="width: 65px;" id="Stress">N/A</span>
+                    </td>
+                </tr>
+        </table>
+        <br/>
+        <div style="display:flex; justify-content:center; align-items:center;">
+            <h4 style="font-weight: bold">Result:</h4>
+        </div>
+        <div style="display:flex; justify-content:center; align-items:center;">
+            <pre id="Result">N/A</pre>
+        </div>
+        <br/>
+        <table style="width: 100%; margin: 0 0 0 0">
+            <tbody>
+                <tr>
+                    <td style="text-align:center">
+                        <input type="button" id="RollA" value="Roll A Only" style="width: 115px" />
+                    </td>
+                    <td style="text-align:center">
+                        <input type="button" id="RollBoth" value="Roll Both" style="width: 115px" />
+                    </td>
+                    <td style="text-align:center">
+                        <input type="button" id="RollB" value="Roll B Only" style="width: 115px" />
+                    </td>
+                </tr>
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function stochastic_round(num) {
+
+        // Get integer part
+        var result = num < 0 ? Math.ceil(num) : Math.floor(num);
+        if (result === -0) result = 0;
+
+        // Get decimal part
+        var decimalPart = num % 1;
+        if (decimalPart < 0) decimalPart = -decimalPart;
+
+        // With probability of decimal part, add (or subtract) 1 from the integer part
+        var rand = Math.random();
+        if (rand <= decimalPart) {
+            if (num < 0) result -= 1;
+            else result += 1;
+        }
+
+        return result;
+    }
+    function gaussian(min, max) {
+
+        let u = 0, v = 0;
+        while (u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+        while (v === 0) v = Math.random();
+        let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+
+        num = num / 10.0 + 0.5; // Translate to 0 -> 1
+        if (num > 1 || num < 0) num = gaussian(min, max); // resample between 0 and 1 if out of range
+        num *= max - min; // Stretch to fill range
+        num += min; // offset to min
+
+        return num;
+    }
+    function Fudge(skillLevel) {
+        //Calculate max and min as 3sigma with stdev of skillLevel * 0.15
+        var max = skillLevel * 0.45;
+        var min = max * -1;
+        var random = gaussian(min, max);
+        var rounded = stochastic_round(random);
+        return rounded;
+    }
+    function RollA() {
+        var skill = parseInt($('#A_Skill').val());
+        var mod = parseFloat($('#A_Mod').val());
+        var bonus = parseInt($('#A_Bonus').val());
+
+        var fudge = Fudge(skill);
+        $("#A_Fudge").text(fudge);
+        
+        var total = stochastic_round(skill * mod) + bonus + fudge;
+        if (total < 1) total = 1;
+        $("#A_Total").text(total);
+    }
+    function RollB() {
+        var skill = parseInt($('#B_Skill').val());
+        var mod = parseFloat($('#B_Mod').val());
+        var bonus = parseInt($('#B_Bonus').val());
+
+        var fudge = Fudge(skill);
+        $("#B_Fudge").text(fudge);
+
+        var total = stochastic_round(skill * mod) + bonus + fudge;
+        if (total < 1) total = 1;
+        $("#B_Total").text(total);
+    }
+    var tempPool = 0;
+    function UpdateOutcome() {
+        var a_total = parseInt($("#A_Total").text());
+        var b_total = parseInt($("#B_Total").text());
+
+        var z = ((2 * a_total) / (a_total + b_total)) - 1;
+        $("#Outcome").text(z.toFixed(2));
+
+        var t = z >= 0.19
+            ? "Absolute Victory"
+            : z >= 0.14
+            ? "Crushing Victory"
+            : z >= 0.08
+            ? "Standard Victory"
+            : z >= 0.01
+            ? "Pressing Victory"
+            : z > -0.01
+            ? "Inconclusive"
+            : z > -0.08
+            ? "Pressing Defeat"
+            : z > -0.14
+            ? "Standard Defeat"
+            : z > -0.19
+            ? "Crushing Defeat"
+            : "Absolute Defeat";
+        $("#Threshold").text(t);
+
+        var abs_diff = Math.abs(a_total - b_total);
+        var z_factor = 1.0 / Math.pow((1 - Math.abs(z)), 2);
+        var s = (abs_diff * z_factor)/2.0 + 1;
+        var stress = stochastic_round(s);
+
+        //Handle temp stress (inconclusive)
+        if (z > -0.08 && z < 0.08) {
+            if (z <= -0.01 && tempPool <= 0) {
+                tempPool -= stress;
+            }
+            else if (z <= -0.01 && tempPool > 0) {
+                tempPool = 0;
+            }
+            else if (z > -0.01 && z < 0.01) {
+                tempPool = 0;
+            }
+            else if (z >= 0.01 && tempPool < 0) {
+                tempPool = 0;
+            }
+            else if (z >= 0.01 && tempPool >= 0) {
+                tempPool += stress;
+            }
+
+            if (tempPool < 0) {
+                $("#Result").text("(A) in danger: " + -tempPool);
+            }
+            else if (tempPool > 0) {
+                $("#Result").text("(B) in danger: " + tempPool);
+            } else {
+                $("#Result").text("N/A");
+            }            
+        }
+        //Standard or greater
+        else {
+            var resultText = "";
+
+            if (z < 0 && tempPool < 0) {
+                resultText += "(A) takes critical damage: " + -tempPool + "\n";
+                stress += Math.abs(tempPool);
+            } else if (z > 0 && tempPool > 0) {
+                resultText += "(B) takes critical damage: " + tempPool + "\n";
+                stress += Math.abs(tempPool);
+            }
+            tempPool = 0;
+
+            if (stress > 0) {
+                if (z < 0) {
+                    resultText += "(A) takes stress: " + stress + "\n";
+                    lastOutcome = 0;
+                } else if (z > 0) {
+                    resultText += "(B) takes stress: " + stress + "\n";
+                    lastOutcome = 0;
+                }
+            }
+
+            //Stagger?
+            var a_cap = parseFloat($("#A_Cap").val());
+            var b_cap = parseFloat($("#B_Cap").val());
+            var cap = z < 0 ? a_cap : b_cap;
+            var ratio = stress / cap;
+            if (ratio >= 0.3) {
+                if (z < 0) {
+                    resultText += "(A) is staggered!\n";
+                }
+                else if (z > 0) {
+                    resultText += "(B) is staggered!\n";
+                }
+            }
+
+            var amount = 0;
+            if (z < 0) {
+                if (ratio >= 0.6) {
+                    amount = (Math.random() * 0.15) + 0.30;
+                    amount = amount.toFixed(2);
+                    resultText += "(A) suffers a critical disadvantage: " + amount;
+                } else if (ratio >= 0.45) {
+                    amount = (Math.random() * 0.15) + 0.15;
+                    amount = amount.toFixed(2);
+                    resultText += "(A) suffers a major disadvantage: " + amount;
+                } else if (ratio >= 0.30) {
+                    amount = (Math.random() * 0.10) + 0.05;
+                    amount = amount.toFixed(2);
+                    resultText += "(A) suffers a moderate disadvantage: " + amount;
+                }
+                else if (ratio >= 0.15) {
+                    amount = (Math.random() * 0.05) + 0.01;
+                    amount = amount.toFixed(2);
+                    resultText += "(A) suffers a minor disadvantage: " + amount;
+                } else if (Math.random() < 0.1) {
+                    resultText += "(A) suffers a trivial disadvantage";
+                }
+            } else if (z > 0) {
+                if (ratio >= 0.6) {
+                    amount = (Math.random() * 0.15) + 0.30;
+                    amount = amount.toFixed(2);
+                    resultText += "(B) suffers a critical disadvantage: " + amount;
+                } else if (ratio >= 0.45) {
+                    amount = (Math.random() * 0.15) + 0.15;
+                    amount = amount.toFixed(2);
+                    resultText += "(B) suffers a major disadvantage: " + amount;
+                } else if (ratio >= 0.30) {
+                    amount = (Math.random() * 0.10) + 0.05;
+                    amount = amount.toFixed(2);
+                    resultText += "(B) suffers a moderate disadvantage: " + amount;
+                }
+                else if (ratio >= 0.15) {
+                    amount = (Math.random() * 0.05) + 0.01;
+                    amount = amount.toFixed(2);
+                    resultText += "(B) suffers a minor disadvantage: " + amount;
+                } else if (Math.random() < 0.1) {
+                    resultText += "(B) suffers a trivial disadvantage";
+                }
+            }
+
+            if (resultText === "") {
+                resultText = "N/A";
+                lastOutcome = 0;
+            }
+
+            $("#Result").text(resultText);
+        }
+        $("#Stress").text(stress);
+    }
+    $(document).ready(function() {
+        $('#RollA').click(function() {
+            RollA();
+            UpdateOutcome();
+        });
+        $('#RollB').click(function() {
+            RollB();
+            UpdateOutcome();
+        });
+        $('#RollBoth').click(function() {
+            RollA();
+            RollB();
+            UpdateOutcome();
+        });
+    });
+</script>
